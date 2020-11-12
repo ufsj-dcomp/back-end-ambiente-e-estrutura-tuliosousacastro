@@ -43,21 +43,20 @@ paths:
           schema:
             $ref: "#/definitions/consulta" 
 
-  /consulta/consultaPorUser:
+  /consulta/consultausername:
     get:
       tags:
       - "consulta"
-      summary: "Busca uma consulta pelo id do usuario"
-      operationId: "getConsultaByIdusuario"
+      summary: "Busca uma consulta pelo username do usuario"
+      operationId: "getConsultaByUsername"
       produces:
       - "application/json"
       parameters:
-      - name: "consultaidusuario"
+      - name: "consultausername"
         in: "query"
         description: "Id de uma consulta por usuario"
         required: true
-        type: "integer"
-        format: "int64"
+        type: "string"
       responses:
         200:
           description: "OK "     
@@ -300,9 +299,8 @@ definitions:
       consultaid:
         type: "integer"
         format: "int64"
-      consultaidusuario:
-        type: "integer"
-        format: "int64"
+      consultausername:
+        type: "string"
       categoria:
         type: "string"
       titulo:
