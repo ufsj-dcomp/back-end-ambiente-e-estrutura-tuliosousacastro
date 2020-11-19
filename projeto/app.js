@@ -1,5 +1,7 @@
 var express = require('express');
 var app = express();
+var cors = require('cors');
+
 
 var mysql = require('mysql');   
 var connection = mysql.createConnection({
@@ -12,10 +14,10 @@ var connection = mysql.createConnection({
 
 
 app.use(express.json());
-
+app.use(cors());
 app.post('/consulta', (req, resp) => {
  var consultas = req.body;
- console.log("POST CONSULTA ");
+ 
 
  connection.query("INSERT INTO consulta SET ?",[consultas],(err, result) => {
      
@@ -24,11 +26,28 @@ app.post('/consulta', (req, resp) => {
          resp.status(500).end();
      } else{
          resp.status(200);
-         resp.json(result);
-     }
+         resp.json(result.insertId);
+         console.log("POST CONSULTA " + result.insertId);
+     } 
  });
 
 }); 
+
+
+app.get('/consulta',(req, resp) => {
+    var consultaid = req.params.consultaid;
+    console.log(" Get: Consultaid "+consultaid);
+
+    connection.query("SELECT * FROM consulta",(err, result) => {
+        if(err){
+            console.log(err);
+            resp.status(500).end();
+        } else {
+            resp.status(200);
+            resp.json(result);
+        }
+    });
+});
 
 app.get('/consulta/:consultaid',(req, resp) => {
     var consultaid = req.params.consultaid;
@@ -62,6 +81,10 @@ app.put('/consulta/:consultaid',(req, resp) => {
 
    })
 
+
+
+   
+
    app.get('/consulta/consultausername/:consultausername/',(req, resp) => {
     var consultausername = req.params.consultausername;
     console.log(" GET: Consultaidusuario "+consultausername);
@@ -77,28 +100,28 @@ app.put('/consulta/:consultaid',(req, resp) => {
     });
    })
 
-app.delete('/consulta/:consultaid',(req, resp) => {
-    var consultaid = req.params.consultaid;
-    console.log(" Delete: Consultaid "+consultaid);
-    connection.query("DELETE FROM consulta WHERE consultaid = ?", [consultaid],(err, result) => {
-        if(err){
-            console.log(err);
-            resp.status(500).end();
-        } else {
-            resp.status(200);
-            resp.json(result);
-        }
-    });
+    app.delete('/consulta/:consultaid',(req, resp) => {
+        var consultaid = req.params.consultaid;
+        console.log(" Delete: Consultaid "+consultaid);
+        connection.query("DELETE FROM consulta WHERE consultaid = ?", [consultaid],(err, result) => {
+            if(err){
+                console.log(err);
+                resp.status(500).end();
+            } else {
+                resp.status(200);
+                resp.json(result);
+            }
+        });
 
 
 
-}) 
+    }) 
 
 
-app.post('/user', (req, resp) => {
+    app.post('/user', (req, resp) => {
     var user = req.body;
     console.log(JSON.stringify(user));
-    connection.query("INSERT INTO consulta SET ?",[user],(err, result) => {
+    connection.query("INSERT INTO user SET ?",[user],(err, result) => {
         if(err){
             console.log(err);
             resp.status(500).end();
@@ -110,12 +133,23 @@ app.post('/user', (req, resp) => {
    
    }) 
 
-
+   app.get('/user',(req, resp) => {
+    console.log(" Get: User ");
+    connection.query("SELECT * FROM user",(err, result) => {
+        if(err){
+            console.log(err);
+            resp.status(500).end();
+        } else {
+            resp.status(200);
+            resp.json(result);
+        }
+    });
+})
 
 app.get('/user/:username',(req, resp) => {
     var username = req.params.username;
     console.log(" Get: Username "+username);
-    connection.query("SELECT * FROM consulta WHERE username = ?", [username],(err, result) => {
+    connection.query("SELECT * FROM user WHERE username = ?", [username],(err, result) => {
         if(err){
             console.log(err);
             resp.status(500).end();
@@ -131,7 +165,7 @@ app.put('/user/:username',(req, resp) => {
     var user = req.body;
     console.log(" Put: Username "+username);
 
-    connection.query("UPDATE consulta SET ? WHERE username = ?", [user,username],(err, result) => {
+    connection.query("UPDATE user SET ? WHERE username = ?", [user,username],(err, result) => {
         if(err){
             console.log(err);
             resp.status(500).end();
@@ -146,7 +180,7 @@ app.put('/user/:username',(req, resp) => {
 app.delete('/consulta/:username',(req, resp) => {
     var username = req.params.username;
     console.log(" Delete: Username "+username);
-    connection.query("DELETE FROM consulta WHERE username = ?", [username],(err, result) => {
+    connection.query("DELETE FROM user WHERE username = ?", [username],(err, result) => {
         if(err){
             console.log(err);
             resp.status(500).end();

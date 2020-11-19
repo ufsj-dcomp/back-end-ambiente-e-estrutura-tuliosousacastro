@@ -1,1 +1,59 @@
-<p>consulta works!</p>
+<div class="row justify-content-md-center mt-5">
+    <div class ="col-6 align-self-center">
+        <h1>Consultas</h1>
+        
+    </div>
+    <div class ="col-2 align-self-center">
+        <button mat-stroked-button class="float-right" color="primary" (click)="openNewDialog()">Adicionar</button>
+    </div>
+</div>  
+
+<div class="row justify-content-md-center">
+    <div class="col-8">
+
+        <table mat-table [dataSource] ="dataSource" class="mat-evelation-z8" width="100%">
+
+            <ng-container matColumnDef="consultaid">
+                <th mat-header-cell *matHeaderCellDef> No. </th>
+                <td mat-cell *matCellDef="let consulta"> {{consulta.consultaid}} </td>
+            </ng-container>
+        
+            <ng-container matColumnDef="consultausername">
+                <th mat-header-cell *matHeaderCellDef> Username. </th>
+                <td mat-cell *matCellDef="let consulta"> {{consulta.consultausername}} </td>
+            </ng-container>
+        
+            <ng-container matColumnDef="categoria">
+                <th mat-header-cell *matHeaderCellDef> Categoria. </th>
+                <td mat-cell *matCellDef="let consulta"> {{consulta.categoria}} </td>
+            </ng-container>
+        
+            <ng-container matColumnDef="titulo">
+                <th mat-header-cell *matHeaderCellDef> Titulo. </th>
+                <td mat-cell *matCellDef="let consulta"> {{consulta.titulo}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="descricao">
+                <th mat-header-cell *matHeaderCellDef> Descricao. </th>
+                <td mat-cell *matCellDef="let consulta"> {{consulta.descricao}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="acoes">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let consulta">
+                    <button mat-stroked-button class="float-right" color="primary" (click)="excluir(consulta)">Excluir</button>
+                    <button mat-stroked-button class="float-right" color="primary" (click)="openEditDialog(consulta)">Editar</button>
+                </td>
+            </ng-container>
+
+
+        
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let consulta; columns: displayedColumns;"></tr>
+        </table>
+    </div>
+
+
+
+</div>
+
