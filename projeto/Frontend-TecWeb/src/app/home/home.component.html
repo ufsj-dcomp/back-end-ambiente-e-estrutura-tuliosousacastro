@@ -1,0 +1,16 @@
+<mat-toolbar>
+    <mat-toolbar-row>
+        <span>TecWeb App</span> 
+        <div>
+            <a mat-button [routerLink]= "'/home/consulta'">Serviços</a>
+            <a mat-button [routerLink]= "'/home/usuarios'">Usuarios</a>
+        </div>
+
+
+
+    </mat-toolbar-row>
+</mat-toolbar>
+
+<div class ="container-fluid">
+    <router-outlet></router-outlet>
+</div>

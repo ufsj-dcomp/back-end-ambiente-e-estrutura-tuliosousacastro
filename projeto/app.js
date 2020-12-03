@@ -1,7 +1,7 @@
 var express = require('express');
 var app = express();
 var cors = require('cors');
-
+var jwt = require('jsonwebtoken');
 
 var mysql = require('mysql');   
 var connection = mysql.createConnection({
@@ -13,11 +13,49 @@ var connection = mysql.createConnection({
 });
 
 
+
 app.use(express.json());
 app.use(cors());
-app.post('/consulta', (req, resp) => {
- var consultas = req.body;
+
+app.post('/auth', (req,resp) => {
+    var user = req.body;
+    
  
+    connection.query("SELECT * FROM user WHERE username = ? and password = ?", [user.username, user.password] , (err, result) =>{
+        console.log(result[0]);
+        var usuario = result[0];
+      if(result.length == 0) {
+          resp.status(401);
+          resp.send({token: null, usuario: usuario, success: false});
+      } else {
+        let token = jwt.sign({id: usuario.username}, 'tecbikeweb', {expiresIn: 6000});
+        resp.status(200);
+        resp.send({token: token, usuario:usuario, success: true});
+      }
+  
+    });
+  
+  });
+ 
+
+verifica_token = (req, resp, next) => {
+    var token = req.headers['x-access-token'];
+    if (!token){
+        return resp.status(401).end();
+    }
+    jwt.verify(token, 'tecbikeweb', (err, decoded) => {
+        if (err){
+            return resp.status(401).end();
+        }
+        req.user = decoded.id;
+        next();
+
+    });
+}
+
+app.post('/consulta',verifica_token, (req, resp) => {
+ var consultas = req.body;
+
 
  connection.query("INSERT INTO consulta SET ?",[consultas],(err, result) => {
      
@@ -34,11 +72,11 @@ app.post('/consulta', (req, resp) => {
 }); 
 
 
-app.get('/consulta',(req, resp) => {
-    var consultaid = req.params.consultaid;
-    console.log(" Get: Consultaid "+consultaid);
+app.get('/consulta',verifica_token,(req, resp) => {
 
-    connection.query("SELECT * FROM consulta",(err, result) => {
+
+
+    connection.query("SELECT * FROM consulta WHERE consultausername = ?",[req.user],(err, result) => {
         if(err){
             console.log(err);
             resp.status(500).end();
@@ -49,7 +87,7 @@ app.get('/consulta',(req, resp) => {
     });
 });
 
-app.get('/consulta/:consultaid',(req, resp) => {
+app.get('/consulta/:consultaid',verifica_token,(req, resp) => {
     var consultaid = req.params.consultaid;
     console.log(" Get: Consultaid "+consultaid);
 
@@ -64,7 +102,7 @@ app.get('/consulta/:consultaid',(req, resp) => {
     });
 });
 
-app.put('/consulta/:consultaid',(req, resp) => {
+app.put('/consulta/:consultaid',verifica_token,(req, resp) => {
     var consultaid = req.params.consultaid;
     var consulta = req.body;
     console.log(" Put: Consultaid "+consultaid);
@@ -85,7 +123,7 @@ app.put('/consulta/:consultaid',(req, resp) => {
 
    
 
-   app.get('/consulta/consultausername/:consultausername/',(req, resp) => {
+   app.get('/consulta/consultausername/:consultausername/',verifica_token,(req, resp) => {
     var consultausername = req.params.consultausername;
     console.log(" GET: Consultaidusuario "+consultausername);
 
@@ -100,7 +138,7 @@ app.put('/consulta/:consultaid',(req, resp) => {
     });
    })
 
-    app.delete('/consulta/:consultaid',(req, resp) => {
+    app.delete('/consulta/:consultaid',verifica_token,(req, resp) => {
         var consultaid = req.params.consultaid;
         console.log(" Delete: Consultaid "+consultaid);
         connection.query("DELETE FROM consulta WHERE consultaid = ?", [consultaid],(err, result) => {
@@ -133,9 +171,9 @@ app.put('/consulta/:consultaid',(req, resp) => {
    
    }) 
 
-   app.get('/user',(req, resp) => {
+   app.get('/user',verifica_token,(req, resp) => {
     console.log(" Get: User ");
-    connection.query("SELECT * FROM user",(err, result) => {
+    connection.query("SELECT * FROM user WHERE username = ?",[req.user],(err, result) => {
         if(err){
             console.log(err);
             resp.status(500).end();
@@ -146,7 +184,7 @@ app.put('/consulta/:consultaid',(req, resp) => {
     });
 })
 
-app.get('/user/:username',(req, resp) => {
+app.get('/user/:username',verifica_token,(req, resp) => {
     var username = req.params.username;
     console.log(" Get: Username "+username);
     connection.query("SELECT * FROM user WHERE username = ?", [username],(err, result) => {
@@ -160,7 +198,7 @@ app.get('/user/:username',(req, resp) => {
     });
 })
    
-app.put('/user/:username',(req, resp) => {
+app.put('/user/:username',verifica_token,(req, resp) => {
     var username = req.params.username;
     var user = req.body;
     console.log(" Put: Username "+username);
@@ -177,7 +215,7 @@ app.put('/user/:username',(req, resp) => {
 
    })
 
-app.delete('/consulta/:username',(req, resp) => {
+app.delete('/consulta/:username',verifica_token,(req, resp) => {
     var username = req.params.username;
     console.log(" Delete: Username "+username);
     connection.query("DELETE FROM user WHERE username = ?", [username],(err, result) => {

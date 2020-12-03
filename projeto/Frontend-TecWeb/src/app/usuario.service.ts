@@ -1,6 +1,7 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { Globals } from './globals/globals';
 import { Usuario } from './usuarios/usuarios.component';
 
 @Injectable({
@@ -8,14 +9,14 @@ import { Usuario } from './usuarios/usuarios.component';
 })
 export class UsuarioService {
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private globals: Globals) { }
 
   getUsers(): Observable<Usuario[]>{
-    return this.http.get<Usuario[]>("http://localhost:3000/user"); 
+    return this.http.get<Usuario[]>("http://localhost:3000/user",this.header()); 
   }
 
   getUser(userId: number): Observable<Usuario>{
-    return this.http.get<Usuario>("http://localhost:3000/user/" + userId); 
+    return this.http.get<Usuario>("http://localhost:3000/user/" + userId,this.header()); 
   }
 
   adicionarUser(usuario: Usuario): Observable<any>{
@@ -23,12 +24,21 @@ export class UsuarioService {
   }
 
   editarUser(usuario: Usuario): Observable<any>{
-    return this.http.put("http://localhost:3000/user/" + usuario.userid, usuario); 
+    return this.http.put("http://localhost:3000/user/" + usuario.userid, usuario,this.header()); 
   }
 
   removerUser(usuario: Usuario): Observable<any>{
-    return this.http.delete("http://localhost:3000/user/" + usuario.userid); 
+    return this.http.delete("http://localhost:3000/user/" + usuario.userid,this.header()); 
   }
 
+
+
+  header(){
+    return{
+      headers: new HttpHeaders({'Content-type': 'application/json',
+        'x-access-token': this.globals.loginData.token
+      })
+    };
+   }
 
 }
